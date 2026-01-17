@@ -37,8 +37,8 @@ export function useLocalStorage(storageKey: string = "expenses") {
   const updateExpense = (id: string, updates: Partial<Expense>) => {
     setExpenses((prev) =>
       prev.map((expense) =>
-        expense.id === id ? { ...expense, ...updates } : expense
-      )
+        expense.id === id ? { ...expense, ...updates } : expense,
+      ),
     );
   };
 
@@ -74,55 +74,3 @@ export function useLocalStorage(storageKey: string = "expenses") {
     expenseCount: expenses.length,
   };
 }
-
-// interface LocalStorageContextType {
-//   expenses: Expense[];
-//   addExpense: (expense: Expense) => void;
-//   getExpense: (id: string) => Expense | undefined;
-//   updateExpense: (id: string, updates: Partial<Expense>) => void;
-//   deleteExpense: (id: string) => void;
-//   deleteExpenses: (ids: string[]) => void;
-//   clearExpenses: () => void;
-//   totalExpenses: number;
-//   expenseCount: number;
-// }
-
-// const LocalStorageContext = createContext<LocalStorageContextType | null>(null);
-
-// export function LocalStorageProvider() {
-//   const {
-//     expenses,
-//     addExpense,
-//     getExpense,
-//     updateExpense,
-//     deleteExpense,
-//     deleteExpenses,
-//     clearExpenses,
-//     totalExpenses,
-//     expenseCount,
-//   } = useLocalStorageHook();
-
-//   return (
-//     <LocalStorageContext.Provider
-//       value={{
-//         expenses,
-//         addExpense,
-//         getExpense,
-//         updateExpense,
-//         deleteExpense,
-//         deleteExpenses,
-//         clearExpenses,
-//         totalExpenses,
-//         expenseCount,
-//       }}
-//     ></LocalStorageContext.Provider>
-//   );
-// }
-
-// export function useLocalStorageContext() {
-//   const context = useContext(LocalStorageContext);
-//   if (!context) {
-//     throw Error("Local storage hook is undefined");
-//   }
-//   return context;
-// }

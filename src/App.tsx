@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChartPieDonutText } from "./pie-chart/PieChart";
 import { Calendar } from "./components/ui/calendar";
-import { columns } from "./table/columns";
+import { createColumns } from "./table/columns";
 import { DataTable } from "./table/data-table";
 import Navbar from "./components/Navbar";
 import { useLocalStorage } from "./lib/local-storage-api";
 import AddExpenseDialogForm from "./components/AddExpenseDialogForm";
 export default function App() {
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const { expenses, addExpense } = useLocalStorage();
+  const [month, setMonth] = useState<Date | undefined>(new Date());
+  const { expenses, addExpense, deleteExpense } = useLocalStorage();
+  const columns = useMemo(() => createColumns(deleteExpense), [deleteExpense]);
 
   return (
     <div className="relative">
@@ -21,6 +23,8 @@ export default function App() {
         />
         <Calendar
           mode="single"
+          month={month}
+          onMonthChange={setMonth}
           selected={date}
           onSelect={setDate}
           className="w-full md:order-2"
@@ -30,6 +34,8 @@ export default function App() {
           data={expenses}
           className="md:col-span-2 md:order-4"
         />
+        <p>{month?.toLocaleDateString()}</p>
+        <p>{date?.toLocaleDateString()}</p>
       </div>
     </div>
   );
