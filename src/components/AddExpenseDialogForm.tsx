@@ -1,7 +1,7 @@
-import { Calendar, DollarSign, Plus } from "lucide-react";
+import { DollarSign, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import z, { date } from "zod";
+import z from "zod";
 import { useForm } from "@tanstack/react-form";
 import {
   Field,
@@ -21,13 +21,14 @@ import {
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { Input } from "./ui/input";
 import type { Expense } from "@/table/columns";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   amount: z.number().gt(0, "Expense amount must be greater than $0"),
   date: z.date("Please select a date."),
   category: z.enum(
     ["food", "daily", "transportation", "recreation"],
-    "Please choose a category."
+    "Please choose a category.",
   ),
   description: z
     .string()
@@ -47,7 +48,13 @@ const parseDateFromInput = (dateString: string) => {
   return new Date(dateString + "T00:00:00"); // Add time to avoid timezone issues
 };
 
-export default function AddExpenseDialogForm() {
+export default function AddExpenseDialogForm({
+  addExpense,
+  className,
+}: {
+  addExpense: (expense: Expense) => void;
+  className?: string;
+}) {
   const form = useForm({
     defaultValues: {
       amount: 1,
@@ -67,7 +74,7 @@ export default function AddExpenseDialogForm() {
         category: value.category,
         description: value.description,
       };
-      // handleAddExpense(expense);
+      addExpense(expense);
       form.reset();
     },
   });
@@ -75,7 +82,7 @@ export default function AddExpenseDialogForm() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>
+        <Button className={cn(className, "shadow-sm")}>
           <Plus /> Log an Expense
         </Button>
       </DialogTrigger>
@@ -218,7 +225,9 @@ export default function AddExpenseDialogForm() {
                 );
               }}
             />
-            <Button type="submit">"Save"</Button>
+            <Button type="submit" className="shadow-sm">
+              Save
+            </Button>
           </FieldGroup>
         </form>
       </DialogContent>
