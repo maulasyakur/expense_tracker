@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { ChartPieDonutText } from "./pie-chart/PieChart";
-import { Calendar } from "./components/ui/calendar";
+import { Calendar, CalendarDayButton } from "./components/ui/calendar";
 import { DataTable } from "./table/data-table";
 import Navbar from "./components/Navbar";
 import { ExpenseProvider, useLocalStorage } from "./lib/local-storage-hook";
@@ -68,6 +68,31 @@ export default function App() {
               setIsMonthlyView(false);
             }}
             className="w-full md:order-2"
+            components={{
+              DayButton: ({ children, modifiers, day, ...props }) => {
+                return (
+                  <CalendarDayButton day={day} modifiers={modifiers} {...props}>
+                    {children}
+                    {!modifiers.outside && (
+                      <span>
+                        $
+                        {monthlyExpenses
+                          .filter(
+                            ({ date }) =>
+                              date.getDate() === day.date.getDate() &&
+                              date.getMonth() === day.date.getMonth() &&
+                              date.getFullYear() === day.date.getFullYear(),
+                          )
+                          .reduce(
+                            (total, current) => total + current.amount,
+                            0,
+                          )}
+                      </span>
+                    )}
+                  </CalendarDayButton>
+                );
+              },
+            }}
             required
           />
           <DataTable
