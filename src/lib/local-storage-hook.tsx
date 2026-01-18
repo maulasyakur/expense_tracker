@@ -6,7 +6,6 @@ import {
   createContext,
   type ReactNode,
   useContext,
-  useMemo,
 } from "react";
 
 export function useLocalStorage(storageKey: string = "expenses") {
@@ -37,61 +36,6 @@ export function useLocalStorage(storageKey: string = "expenses") {
     }
   }, [expenses, storageKey]);
 
-  // Calculate category totals - memoized for performance
-  const categoryTotals = useMemo(() => {
-    const totals: Record<string, number> = {};
-
-    expenses.forEach((expense) => {
-      const category = expense.category;
-      if (!totals[category]) {
-        totals[category] = 0;
-      }
-      totals[category] += expense.amount;
-    });
-
-    return totals;
-  }, [expenses]);
-
-  // Calculate total of all expenses
-  const totalExpenses = useMemo(() => {
-    return expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  }, [expenses]);
-
-  // Get categories as an array of objects with name and total
-  const categoryTotalsArray = useMemo(() => {
-    return Object.entries(categoryTotals).map(([category, total]) => ({
-      category,
-      total,
-    }));
-  }, [categoryTotals]);
-
-  // Get categories sorted by amount (highest first)
-  const sortedCategoryTotals = useMemo(() => {
-    return categoryTotalsArray.sort((a, b) => b.total - a.total);
-  }, [categoryTotalsArray]);
-
-  // Get top spending category
-  const topCategory = useMemo(() => {
-    if (sortedCategoryTotals.length === 0) return null;
-    return sortedCategoryTotals[0];
-  }, [sortedCategoryTotals]);
-
-  // Get expenses by category
-  const getExpensesByCategory = (category: string) => {
-    return expenses.filter((expense) => expense.category === category);
-  };
-
-  // Get category total (individual category)
-  const getCategoryTotal = (category: string): number => {
-    return categoryTotals[category] || 0;
-  };
-
-  // Get category percentage of total
-  const getCategoryPercentage = (category: string): number => {
-    if (totalExpenses === 0) return 0;
-    return ((categoryTotals[category] || 0) / totalExpenses) * 100;
-  };
-
   // Calculate monthly category totals
   const getMonthlyCategoryTotals = (year?: number, month?: number) => {
     const monthlyTotals: Record<string, number> = {};
@@ -99,7 +43,7 @@ export function useLocalStorage(storageKey: string = "expenses") {
     expenses.forEach((expense) => {
       const expenseDate = new Date(expense.date);
       const expenseYear = expenseDate.getFullYear();
-      const expenseMonth = expenseDate.getMonth() + 1; // 1-12
+      const expenseMonth = expenseDate.getMonth();
 
       // If year/month provided, filter by them
       if (year && expenseYear !== year) return;
@@ -115,17 +59,26 @@ export function useLocalStorage(storageKey: string = "expenses") {
     return monthlyTotals;
   };
 
-  // Calculate category totals for a specific month
-  const getCategoryTotalsForMonth = (year: number, month: number) => {
-    return getMonthlyCategoryTotals(year, month);
+  const getMonthlyCategoryTotalsArray = (year?: number, month?: number) => {
+    const data = getMonthlyCategoryTotals(year, month);
+    if (!data) return [];
+    return Object.entries(data).map(([category, total]) => ({
+      category,
+      total,
+    }));
   };
 
-  // Calculate category totals for current month
-  const getCurrentMonthCategoryTotals = () => {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1;
-    return getCategoryTotalsForMonth(currentYear, currentMonth);
+  const getMonthlyTotal = (year?: number, month?: number) => {
+    const data = getMonthlyCategoryTotals(year, month);
+    if (!data) return 0;
+    return Object.values(data).reduce((total, current) => total + current, 0);
+  };
+
+  const getMonthlyExpenses = (year?: number, month?: number) => {
+    if (!expenses) return [];
+    return expenses.filter(
+      ({ date }) => date.getMonth() === month && date.getFullYear() === year,
+    );
   };
 
   // CRUD Operations (existing)
@@ -149,40 +102,20 @@ export function useLocalStorage(storageKey: string = "expenses") {
     setExpenses((prev) => prev.filter((expense) => expense.id !== id));
   };
 
-  const deleteExpenses = (ids: string[]) => {
-    setExpenses((prev) => prev.filter((expense) => !ids.includes(expense.id)));
-  };
-
-  const clearExpenses = () => {
-    setExpenses([]);
-  };
-
   return {
     // Data
     expenses,
 
-    // Category calculations
-    categoryTotals, // Object: { food: 150, transportation: 75, ... }
-    categoryTotalsArray, // Array: [{category: "food", total: 150, percentage: 60}, ...]
-    sortedCategoryTotals, // Array sorted by total descending
-    topCategory, // Top spending category object
-    totalExpenses, // Total of all expenses
-
-    // Category calculation functions
-    getExpensesByCategory,
-    getCategoryTotal,
-    getCategoryPercentage,
-    getMonthlyCategoryTotals,
-    getCategoryTotalsForMonth,
-    getCurrentMonthCategoryTotals,
+    // Monthly calculation functions
+    getMonthlyCategoryTotalsArray,
+    getMonthlyTotal,
+    getMonthlyExpenses,
 
     // CRUD Operations
     addExpense,
     getExpense,
     updateExpense,
     deleteExpense,
-    deleteExpenses,
-    clearExpenses,
 
     // Convenience
     expenseCount: expenses.length,

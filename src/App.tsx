@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChartPieDonutText } from "./pie-chart/PieChart";
 import { Calendar } from "./components/ui/calendar";
 import { DataTable } from "./table/data-table";
@@ -11,13 +11,26 @@ export default function App() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [month, setMonth] = useState<Date | undefined>(new Date());
   const {
-    expenses,
     addExpense,
     deleteExpense,
     updateExpense,
-    sortedCategoryTotals,
-    totalExpenses,
+    getMonthlyCategoryTotalsArray,
+    getMonthlyTotal,
+    getMonthlyExpenses,
   } = useLocalStorage();
+  const monthlyCategoryTotals = useMemo(
+    () =>
+      getMonthlyCategoryTotalsArray(month?.getFullYear(), month?.getMonth()),
+    [month],
+  );
+  const monthlyTotal = useMemo(
+    () => getMonthlyTotal(month?.getFullYear(), month?.getMonth()),
+    [month],
+  );
+  const monthlyExpenses = useMemo(
+    () => getMonthlyExpenses(month?.getFullYear(), month?.getMonth()),
+    [month],
+  );
 
   return (
     <div className="relative">
@@ -29,8 +42,8 @@ export default function App() {
         >
           <ChartPieDonutText
             classname="md:order-1"
-            chartData={sortedCategoryTotals}
-            totalExpenses={totalExpenses}
+            chartData={monthlyCategoryTotals}
+            totalExpenses={monthlyTotal}
           />
           <AddExpenseDialogForm
             addExpense={addExpense}
@@ -46,7 +59,7 @@ export default function App() {
           />
           <DataTable
             columns={columns}
-            data={expenses}
+            data={monthlyExpenses}
             className="md:col-span-2 md:order-4"
           />
         </ExpenseProvider>
