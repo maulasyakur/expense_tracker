@@ -11,17 +11,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import UpdateExpenseDialogForm from "@/components/UpdateExpenseDialogForm";
+import { useExpenseContext } from "@/lib/local-storage-hook";
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, SquarePen, Trash } from "lucide-react";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
 export type Expense = {
   id: string;
   date: Date;
@@ -30,9 +31,7 @@ export type Expense = {
   description: string;
 };
 
-export const createColumns = (
-  deleteExpense: (id: string) => void,
-): ColumnDef<Expense>[] => [
+export const columns: ColumnDef<Expense>[] = [
   {
     accessorKey: "date",
     header: "Date",
@@ -48,11 +47,7 @@ export const createColumns = (
   {
     accessorKey: "amount",
     header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Amount"
-        className="ml-auto text-right"
-      />
+      <DataTableColumnHeader column={column} title="Amount" />
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"));
@@ -72,6 +67,8 @@ export const createColumns = (
     id: "actions",
     cell: ({ row }) => {
       const expense = row.original;
+      const { deleteExpense, updateExpense } = useExpenseContext();
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -81,10 +78,30 @@ export const createColumns = (
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <SquarePen />
-              Edit
-            </DropdownMenuItem>
+            <Dialog>
+              <DialogTrigger asChild>
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault(); // This prevents dropdown from closing
+                  }}
+                >
+                  <SquarePen />
+                  Edit
+                </DropdownMenuItem>
+              </DialogTrigger>
+              <DialogContent>
+                <UpdateExpenseDialogForm
+                  updateExpense={updateExpense}
+                  defaultValues={{
+                    id: expense.id,
+                    amount: expense.amount,
+                    date: expense.date,
+                    category: expense.category,
+                    description: expense.description,
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -112,6 +129,7 @@ export const createColumns = (
                     onClick={() => {
                       deleteExpense(expense.id);
                     }}
+                    className="shadow-md"
                   >
                     Continue
                   </AlertDialogAction>

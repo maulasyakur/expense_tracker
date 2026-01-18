@@ -66,7 +66,6 @@ export default function AddExpenseDialogForm({
       onSubmit: formSchema,
     },
     onSubmit: ({ value }) => {
-      console.log("Form submitted successfully", value);
       const expense: Expense = {
         id: crypto.randomUUID(),
         amount: value.amount,
