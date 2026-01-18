@@ -46,8 +46,8 @@ export function useLocalStorage(storageKey: string = "expenses") {
       const expenseMonth = expenseDate.getMonth();
 
       // If year/month provided, filter by them
-      if (year && expenseYear !== year) return;
-      if (month && expenseMonth !== month) return;
+      if (expenseYear !== year) return;
+      if (expenseMonth !== month) return;
 
       const category = expense.category;
       if (!monthlyTotals[category]) {
