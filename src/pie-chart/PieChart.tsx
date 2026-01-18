@@ -29,6 +29,21 @@ const categoryColorMap: Record<string, string> = {
   recreation: "var(--chart-4)",
 };
 
+const monthsDict: Record<number, string> = {
+  0: "January",
+  1: "February",
+  2: "March",
+  3: "April",
+  4: "May",
+  5: "June",
+  6: "July",
+  7: "August",
+  8: "September",
+  9: "October",
+  10: "November",
+  11: "December",
+};
+
 const chartConfig = {
   total: {
     label: "Total Expense",
@@ -55,6 +70,7 @@ export function ChartPieDonutText({
   classname,
   chartData,
   totalExpenses,
+  month,
 }: {
   classname?: string;
   chartData: {
@@ -62,6 +78,7 @@ export function ChartPieDonutText({
     total: number;
   }[];
   totalExpenses: number;
+  month: Date;
 }) {
   const transformedData = React.useMemo(() => {
     return chartData.map((item) => ({
@@ -74,8 +91,10 @@ export function ChartPieDonutText({
   return (
     <Card className={cn("flex flex-col", classname)}>
       <CardHeader className="items-center pb-0">
-        <CardTitle>Pie Chart - Donut with Text</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle>Total Expense This Month</CardTitle>
+        <CardDescription>
+          {monthsDict[month.getMonth()]} {month.getFullYear()}
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer

@@ -8,29 +8,27 @@ import AddExpenseDialogForm from "./components/AddExpenseDialogForm";
 import { columns } from "./table/columns";
 
 export default function App() {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [month, setMonth] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date>(new Date());
+  const [month, setMonth] = useState<Date>(new Date());
   const {
+    expenses,
     addExpense,
     deleteExpense,
     updateExpense,
     getMonthlyCategoryTotalsArray,
     getMonthlyTotal,
-    getMonthlyExpenses,
+    getDailyExpenses,
   } = useLocalStorage();
   const monthlyCategoryTotals = useMemo(
     () =>
       getMonthlyCategoryTotalsArray(month?.getFullYear(), month?.getMonth()),
-    [month],
+    [month, expenses],
   );
   const monthlyTotal = useMemo(
     () => getMonthlyTotal(month?.getFullYear(), month?.getMonth()),
-    [month],
+    [month, expenses],
   );
-  const monthlyExpenses = useMemo(
-    () => getMonthlyExpenses(month?.getFullYear(), month?.getMonth()),
-    [month],
-  );
+  const dailyExpenses = useMemo(() => getDailyExpenses(date), [date, expenses]);
 
   return (
     <div className="relative">
@@ -44,6 +42,7 @@ export default function App() {
             classname="md:order-1"
             chartData={monthlyCategoryTotals}
             totalExpenses={monthlyTotal}
+            month={month}
           />
           <AddExpenseDialogForm
             addExpense={addExpense}
@@ -56,13 +55,16 @@ export default function App() {
             selected={date}
             onSelect={setDate}
             className="w-full md:order-2"
+            required
           />
           <DataTable
             columns={columns}
-            data={monthlyExpenses}
+            data={dailyExpenses}
             className="md:col-span-2 md:order-4"
           />
         </ExpenseProvider>
+        <p>{date?.toLocaleDateString()}</p>
+        <p>{month?.toLocaleDateString()}</p>
       </div>
     </div>
   );
