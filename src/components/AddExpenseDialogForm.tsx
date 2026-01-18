@@ -50,15 +50,17 @@ const parseDateFromInput = (dateString: string) => {
 
 export default function AddExpenseDialogForm({
   addExpense,
+  defaultDate,
   className,
 }: {
   addExpense: (expense: Expense) => void;
+  defaultDate: Date;
   className?: string;
 }) {
   const form = useForm({
     defaultValues: {
       amount: 1,
-      date: new Date(),
+      date: defaultDate,
       category: "",
       description: "",
     },

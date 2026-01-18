@@ -10,6 +10,7 @@ import { columns } from "./table/columns";
 export default function App() {
   const [date, setDate] = useState<Date>(new Date());
   const [month, setMonth] = useState<Date>(new Date());
+  const [isMonthlyView, setIsMonthlyView] = useState<boolean>(true);
   const {
     expenses,
     addExpense,
@@ -18,6 +19,7 @@ export default function App() {
     getMonthlyCategoryTotalsArray,
     getMonthlyTotal,
     getDailyExpenses,
+    getMonthlyExpenses,
   } = useLocalStorage();
   const monthlyCategoryTotals = useMemo(
     () =>
@@ -29,6 +31,10 @@ export default function App() {
     [month, expenses],
   );
   const dailyExpenses = useMemo(() => getDailyExpenses(date), [date, expenses]);
+  const monthlyExpenses = useMemo(
+    () => getMonthlyExpenses(month.getFullYear(), month.getMonth()),
+    [expenses, month],
+  );
 
   return (
     <div className="relative">
@@ -46,25 +52,30 @@ export default function App() {
           />
           <AddExpenseDialogForm
             addExpense={addExpense}
+            defaultDate={isMonthlyView ? month : date}
             className="md:col-span-2 md:order-3"
           />
           <Calendar
             mode="single"
             month={month}
-            onMonthChange={setMonth}
+            onMonthChange={(e) => {
+              setMonth(e);
+              setIsMonthlyView(true);
+            }}
             selected={date}
-            onSelect={setDate}
+            onSelect={(e) => {
+              setDate(e);
+              setIsMonthlyView(false);
+            }}
             className="w-full md:order-2"
             required
           />
           <DataTable
             columns={columns}
-            data={dailyExpenses}
+            data={isMonthlyView ? monthlyExpenses : dailyExpenses}
             className="md:col-span-2 md:order-4"
           />
         </ExpenseProvider>
-        <p>{date?.toLocaleDateString()}</p>
-        <p>{month?.toLocaleDateString()}</p>
       </div>
     </div>
   );

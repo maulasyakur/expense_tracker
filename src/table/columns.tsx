@@ -34,7 +34,9 @@ export type Expense = {
 export const columns: ColumnDef<Expense>[] = [
   {
     accessorKey: "date",
-    header: "Date",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Date" />
+    ),
     cell: ({ row }) => {
       const date = new Date(row.getValue("date"));
       return date.toLocaleDateString();

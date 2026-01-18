@@ -84,6 +84,15 @@ export function useLocalStorage(storageKey: string = "expenses") {
     );
   };
 
+  const getMonthlyExpenses = (year?: number, month?: number) => {
+    if (!expenses) return [];
+    return expenses.filter((expense) => {
+      return (
+        expense.date.getFullYear() == year && expense.date.getMonth() == month
+      );
+    });
+  };
+
   // CRUD Operations (existing)
   const addExpense = (expense: Expense) => {
     setExpenses((prev) => [...prev, expense]);
@@ -112,6 +121,9 @@ export function useLocalStorage(storageKey: string = "expenses") {
     // Monthly calculation functions
     getMonthlyCategoryTotalsArray,
     getMonthlyTotal,
+    getMonthlyExpenses,
+
+    // Daily calculation functions
     getDailyExpenses,
 
     // CRUD Operations
