@@ -4,7 +4,6 @@ import { Calendar, CalendarDayButton } from "./components/ui/calendar";
 import { DataTable } from "./table/data-table";
 import Navbar from "./components/Navbar";
 import { ExpenseProvider, useLocalStorage } from "./lib/local-storage-hook";
-import AddExpenseDialogForm from "./components/AddExpenseDialogForm";
 import { columns } from "./table/columns";
 
 export default function App() {

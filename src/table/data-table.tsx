@@ -89,7 +89,7 @@ export function DataTable<TData, TValue>({
           <AddExpenseDialogForm
             key={isMonthlyView ? `month-${month?.getTime()}` : `date-${date?.getTime()}`}
             addExpense={addExpense}
-            defaultDate={isMonthlyView ? month : date}
+            defaultDate={isMonthlyView ? month ?? new Date() : date ?? new Date()}
             className="ml-auto"
           />
         </div>
