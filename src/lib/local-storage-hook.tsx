@@ -140,6 +140,7 @@ export function useLocalStorage(storageKey: string = "expenses") {
 interface ExpenseContextType {
   deleteExpense: (id: string) => void;
   updateExpense: (id: string, updates: Partial<Expense>) => void;
+  addExpense: (expense: Expense) => void;
 }
 
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
@@ -148,22 +149,26 @@ export function ExpenseProvider({
   children,
   deleteExpense,
   updateExpense,
+  addExpense,
 }: {
   children: ReactNode;
   deleteExpense: (id: string) => void;
   updateExpense: (id: string, updates: Partial<Expense>) => void;
+  addExpense: (expense: Expense) => void;
 }) {
   return (
-    <ExpenseContext.Provider value={{ deleteExpense, updateExpense }}>
+    <ExpenseContext.Provider
+      value={{ deleteExpense, updateExpense, addExpense }}
+    >
       {children}
     </ExpenseContext.Provider>
   );
 }
 
-export const useExpenseContext = () => {
+export function useExpenseContext() {
   const context = useContext(ExpenseContext);
   if (!context) {
     throw new Error("useExpenseContext must be used within ExpenseProvider");
   }
   return context;
-};
+}

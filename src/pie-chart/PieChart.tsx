@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 import { Label, Pie, PieChart } from "recharts";
 
 import {
@@ -71,6 +71,7 @@ export function ChartPieDonutText({
   chartData,
   totalExpenses,
   month,
+  trendPercentage,
 }: {
   classname?: string;
   chartData: {
@@ -79,14 +80,22 @@ export function ChartPieDonutText({
   }[];
   totalExpenses: number;
   month: Date;
+  trendPercentage: number | null | undefined;
 }) {
+  const hasData = chartData.length > 0 && totalExpenses > 0;
+
   const transformedData = React.useMemo(() => {
+    if (!hasData) {
+      return [{ category: "empty", total: 1, fill: "var(--muted-foreground)" }];
+    }
     return chartData.map((item) => ({
       category: item.category,
       total: item.total,
       fill: categoryColorMap[item.category],
     }));
-  }, [chartData]);
+  }, [chartData, hasData]);
+
+  console.log("transformedData", transformedData);
 
   return (
     <Card className={cn("flex flex-col", classname)}>
@@ -102,10 +111,12 @@ export function ChartPieDonutText({
           className="mx-auto aspect-square max-h-[250px]"
         >
           <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
+            {hasData && (
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+            )}
             <Pie
               data={transformedData}
               dataKey="total"
@@ -146,11 +157,21 @@ export function ChartPieDonutText({
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 leading-none font-medium">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-      </CardFooter>
+      {hasData && (
+        <CardFooter className="flex-col gap-2 text-sm">
+          <div className="flex items-center gap-2 leading-none font-medium">
+            {trendPercentage === null ? (
+              <>No data from last month <TrendingUp className="h-4 w-4" /></>
+            ) : trendPercentage > 0 ? (
+              <>Trending up by {trendPercentage}% this month <TrendingUp className="h-4 w-4 text-green-500" /></>
+            ) : trendPercentage < 0 ? (
+              <>Trending down by {Math.abs(trendPercentage)}% this month <TrendingDown className="h-4 w-4 text-red-500" /></>
+            ) : (
+              <>Same as last month</>
+            )}
+          </div>
+        </CardFooter>
+      )}
     </Card>
   );
 }

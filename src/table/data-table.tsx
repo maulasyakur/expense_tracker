@@ -24,17 +24,25 @@ import { Input } from "@/components/ui/input";
 import { DataTablePagination } from "@/components/DataTablePagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import AddExpenseDialogForm from "@/components/AddExpenseDialogForm";
+import { useExpenseContext } from "@/lib/local-storage-hook";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   className?: string;
+  isMonthlyView?: boolean;
+  month?: Date;
+  date?: Date;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   className,
+  isMonthlyView,
+  month,
+  date,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -58,6 +66,7 @@ export function DataTable<TData, TValue>({
       rowSelection,
     },
   });
+  const { addExpense } = useExpenseContext();
 
   return (
     <Card className={cn(className)}>
@@ -77,6 +86,12 @@ export function DataTable<TData, TValue>({
             {table.getFilteredSelectedRowModel().rows.length} of{" "}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
+          <AddExpenseDialogForm
+            key={isMonthlyView ? `month-${month?.getTime()}` : `date-${date?.getTime()}`}
+            addExpense={addExpense}
+            defaultDate={isMonthlyView ? month : date}
+            className="ml-auto"
+          />
         </div>
         <div className="overflow-hidden rounded-md border min-w-full">
           <Table>

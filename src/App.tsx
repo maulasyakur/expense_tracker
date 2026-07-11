@@ -35,6 +35,20 @@ export default function App() {
     () => getMonthlyExpenses(month.getFullYear(), month.getMonth()),
     [expenses, month],
   );
+  const previousMonthTotal = useMemo(() => {
+    const prev = new Date(month.getFullYear(), month.getMonth() - 1, 1);
+    return getMonthlyTotal(prev.getFullYear(), prev.getMonth());
+  }, [month, expenses]);
+  const trendPercentage = useMemo(() => {
+    if (previousMonthTotal === 0 && monthlyTotal === 0) return 0;
+    if (previousMonthTotal === 0) return null;
+    return Number(
+      (
+        ((monthlyTotal - previousMonthTotal) / previousMonthTotal) *
+        100
+      ).toFixed(1),
+    );
+  }, [monthlyTotal, previousMonthTotal]);
 
   return (
     <div className="relative">
@@ -43,17 +57,14 @@ export default function App() {
         <ExpenseProvider
           deleteExpense={deleteExpense}
           updateExpense={updateExpense}
+          addExpense={addExpense}
         >
           <ChartPieDonutText
             classname="md:order-1"
             chartData={monthlyCategoryTotals}
             totalExpenses={monthlyTotal}
             month={month}
-          />
-          <AddExpenseDialogForm
-            addExpense={addExpense}
-            defaultDate={isMonthlyView ? month : date}
-            className="md:col-span-2 md:order-3"
+            trendPercentage={trendPercentage}
           />
           <Calendar
             mode="single"
@@ -99,6 +110,9 @@ export default function App() {
             columns={columns}
             data={isMonthlyView ? monthlyExpenses : dailyExpenses}
             className="md:col-span-2 md:order-4"
+            isMonthlyView={isMonthlyView}
+            month={month}
+            date={date}
           />
         </ExpenseProvider>
       </div>
